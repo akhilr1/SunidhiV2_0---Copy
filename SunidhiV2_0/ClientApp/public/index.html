@@ -1,0 +1,144 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <!-- "<%= BASE_URL %>favicon.ico" -->
+    <link rel="icon" href="./favicon.ico">
+    <script src="./Scripts/dexie.min.js"></script>
+    <script src="../src/ImworksDb.js"></script>
+    <!--<script src="../src/CommonFunctions.js"></script>-->
+    <script src="./Scripts/Common.js"></script>
+
+    <script src="./Scripts/firebase-app.js"></script>
+    <script src="./Scripts/firebase-messaging.js"></script>
+    <title>ImWorks</title>
+    <!-- <script
+              src="https://code.jquery.com/jquery-3.4.1.slim.min.js"
+              integrity="sha256-pasqAKBDmFT4eHoN2ndd6lN370kFiGUFyTiUHWhU7k8="
+              crossorigin="anonymous"></script> -->
+    <!--<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900">-->
+    <!--<link rel="preconnect" href="https://fonts.gstatic.com">-->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@200;300;400;500;600&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/@mdi/font@4.x/css/materialdesignicons.min.css" rel="stylesheet">
+
+    <link rel="stylesheet" type="text/css" href="<%= BASE_URL %>static/pivot.css">
+    <!--<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.11.4/jquery-ui.min.js"></script>-->
+    <script type="text/javascript" src="<%= BASE_URL %>static/jquery.min.js"></script>
+    <script type="text/javascript" src="<%= BASE_URL %>static/jquery-ui.min.js"></script>
+    <script type="text/javascript" src="<%= BASE_URL %>static/pivot.js"></script>
+    <!--<script src="https://cdn.plot.ly/plotly-basic-latest.min.js"></script>-->
+    <script type="text/javascript" src="<%= BASE_URL %>static/plotly-basic-latest.min.js"></script>
+    <script type="text/javascript" src="<%= BASE_URL %>static/plotly.renderers.js"></script>
+    <script type="text/javascript" src="<%= BASE_URL %>static/xlsx.mini.min.js"></script>
+    <!--<script type="text/javascript" src="https://unpkg.com/xlsx@0.15.1/dist/xlsx.mini.min.js"></script>-->
+
+</head>
+<body>
+
+
+    <noscript>
+        <strong>We're sorry but pwaapp doesn't work properly without JavaScript enabled. Please enable it to continue.</strong>
+    </noscript>
+    <div id="app"></div>
+    <!-- built files will be auto injected -->
+  
+
+    <script type="text/javascript">
+
+        //setInterval(SyncDBToServer() , 3000);
+        //setInterval(function () { SyncDBToServer(); }, 3000);
+
+        //setInterval(function () { syncData.SyncToServer(); },3000);
+
+        GetToken();
+
+        function GetToken() {
+            var config = {
+                apiKey: "AIzaSyAYKnrgq2ew0zrKXTjJGhicP904vV-ehDw",
+                authDomain: "test-9cafc.firebaseapp.com",
+                databaseURL: "https://test-9cafc.firebaseio.com",
+                projectId: "test-9cafc",
+                storageBucket: "test-9cafc.appspot.com",
+                messagingSenderId: "480423247864"
+            };
+
+            if (firebase.apps.length > 0) {
+            } else {
+                firebase.initializeApp(config);
+            }
+
+            const messaging = firebase.messaging();
+            messaging.usePublicVapidKey("BEmwJBkxwKzoVBrXIltwD_hhXXGhnaUHDTq7mD9loMYUwBPch048Sz5vIwLzCayzY6Z-jQFm7SRWPzvwaIyJaA8");
+            messaging.onMessage(function (payload) {
+                console.log('Message received. ', payload);
+                var options = {
+                    body: payload.notification.body,
+                    contentAvailable: true,
+                    icon: ''
+                }
+                //alert(payload.notification.body);
+                var n = new Notification(payload.notification.title, options);
+                // ...
+            });
+            messaging.requestPermission().then(function () {
+                console.log('Notification permission granted.');
+                messaging.getToken().then(function (currentToken) {
+                    if (currentToken) {
+                        // sendTokenToServer(currentToken);
+                        console.log(currentToken);
+
+                        //UpdateNotificationToken(currentToken, value);
+                        localStorage.setItem("notificationToken", currentToken);
+                        //To Update Notification Token Corresponding to User
+                        // updateUIForPushEnabled(currentToken);
+                    } else {
+                        // Show permission request.
+                        console.log('No Instance ID token available. Request permission to generate one.');
+                        // Show permission UI.
+                        // updateUIForPushPermissionRequired();
+                        // setTokenSentToServer(false);
+                    }
+                }).catch(function (err) {
+                    console.log('An error occurred while retrieving token. ', err);
+                    //showToken('Error retrieving Instance ID token. ', err);
+                    // setTokenSentToServer(false);
+                });
+
+                // TODO(developer): Retrieve an Instance ID token for use with FCM.
+                // ...
+            }).catch(function (err) {
+                console.log('Unable to get permission to notify.', err);
+            });
+            // Get Instance ID token. Initially this makes a network call, once retrieved
+            // subsequent calls to getToken will return from cache.
+
+            // Callback fired if Instance ID token is updated.
+            messaging.onTokenRefresh(function () {
+                messaging.getToken().then(function (refreshedToken) {
+                    console.log('Token refreshed.');
+                    console.log(refreshedToken);
+
+                    //To Update Notification Token Corresponding to User
+                    // UpdateNotificationToken(currentToken, value);
+                    localStorage.setItem("notificationToken", currentToken);
+                    // Indicate that the new Instance ID token has not yet been sent to the
+                    // app server.
+                    //setTokenSentToServer(false);
+                    // Send Instance ID token to app server.
+                    //sendTokenToServer(refreshedToken);
+                    // ...
+                }).catch(function (err) {
+                    console.log('Unable to retrieve refreshed token ', err);
+                    //showToken('Unable to retrieve refreshed token ', err);
+                });
+            });
+            // }
+            //}
+        }
+    </script>
+</body>
+
+</html>

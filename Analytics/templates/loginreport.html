@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+   <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+
+<script src="https://unpkg.com/gridjs@5.0.2/dist/gridjs.umd.js"></script>
+<link  rel="stylesheet" type="text/css" href="https://unpkg.com/gridjs@5.0.2/dist/theme/mermaid.min.css"/>
+
+
+<script>
+$(function(){
+
+const grid = new gridjs.Grid({
+  columns: ['Name', 'EmailID', 'PhoneCode','PhoneNumber', 'Organisation','CurrentPosition','CreatedDate'],
+  server: {
+    url: 'getlogindata',
+    then: data => data.map(card => [card.Name, card.EmailID, card.PhoneCode,card.PhoneNumber,card.Organisation,card.CurrentPosition,card.CreatedDate])
+  } 
+});
+grid.render(document.getElementById("gridwrapper"));
+});
+
+
+</script>
+</head>
+<body>
+<h3>Login Details</h3>
+
+<div id="gridwrapper"></div>
+</body>
+</html>

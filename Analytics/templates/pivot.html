@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <link rel="stylesheet" type="text/css" href="/analytics/static/pivot.css">
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.11.4/jquery-ui.min.js"></script>
+    <script type="text/javascript" src="/analytics/static/pivot.js"></script>
+     <script src="https://cdn.plot.ly/plotly-basic-latest.min.js"></script>
+      <script type="text/javascript" src="/analytics/static/plotly.renderers.js"></script>
+   <script type="text/javascript" src="https://unpkg.com/xlsx@0.15.1/dist/xlsx.mini.min.js"></script>
+   
+   <style>
+       .pvtUnused.pvtVertList {
+       
+           max-width: 500px;
+           display: inline-block;
+           overflow: scroll;
+       }
+   </style>
+    <script>
+    a=null;
+    Date.prototype.getWeek = function() {
+    //var dt = new Date(this.getFullYear(),0,1);
+   // return Math.ceil((((this - dt) / 86400000) + dt.getDay()+1)/7);
+       var firstWeekday = new Date(this.getFullYear(), this.getMonth(), 1).getDay();
+      var offsetDate = this.getDate() + firstWeekday - 1;
+      return Math.floor(offsetDate / 7)+1;
+    };
+    
+        $(function () {
+         var derivers = $.pivotUtilities.derivers;
+        var dateFormat =       $.pivotUtilities.derivers.dateFormat;
+        var sortAs =           $.pivotUtilities.sortAs;
+        
+        var sp=new URL(location).searchParams
+        var renderers = $.extend($.pivotUtilities.renderers,
+            $.pivotUtilities.plotly_renderers);
+
+            $.getJSON(window.location.pathname.replace("pivot","getpivotdata")+"?surveyid="+sp.get("surveyid"), function (tdata) {
+                data = tdata;
+                a=data;
+                
+                console.log(tdata);
+                $("#output").pivotUI(data, {
+                
+                
+                hiddenAttributes:["SubmittedDate"],
+                
+                  derivedAttributes: {
+                       "Year":dateFormat("SubmittedDate", "%y", true),
+                        "Quarter": function(record){
+                        
+                            d=new Date(record.SubmittedDate); 
+                           
+                            var q = [4,1,2,3];
+                            return q[Math.floor(d.getMonth() / 3)];
+                        
+                        },
+                        
+                        "Month": dateFormat("SubmittedDate", "%n", true),
+                        "Week":function(record){
+                          d=new Date(record.SubmittedDate); 
+                          return d.getWeek()
+                        },
+                        "Day":   dateFormat("SubmittedDate", "%w", true)
+                       
+                       
+                    },
+                    
+                    
+                    sorters: {
+                        "Month": sortAs(["Jan","Feb","Mar","Apr", "May",
+                                "Jun","Jul","Aug","Sep","Oct","Nov","Dec"]),
+                        "Day": sortAs(["Mon","Tue","Wed", "Thu","Fri",
+                                "Sat","Sun"])
+                    },
+                    
+
+                
+                
+                
+                  renderers: renderers,
+
+                    rows: ["Answer"],
+                    cols: ["QuestionName"],
+                    rendererName: "Horizontal Stacked Bar Chart",
+                rowOrder: "value_a_to_z", colOrder: "value_z_to_a",
+
+                });
+
+            })
+
+
+    $("#btn_excel").click(function(e) {   
+      // window.open('data:application/vnd.ms-excel,' + encodeURIComponent($('#output .pvtTable').parent().html())); // content is the id of the DIV element  
+      // e.preventDefault();   
+	  
+	 ExportToExcel('xlsx');
+		 
+    });   
+	
+	   function ExportToExcel(type, fn, dl) {
+            var elt =document.querySelector("#output .pvtTable") //document.getElementById('tbl_exporttable_to_xls');
+            var wb = XLSX.utils.table_to_book(elt, { sheet: "sheet1" });
+            return dl ?
+                XLSX.write(wb, { bookType: type, bookSST: true, type: 'base64' }) :
+                XLSX.writeFile(wb, fn || ('MySheetName.' + (type || 'xlsx')));
+        }
+
+
+
+        });
+
+
+
+
+    </script>
+</head>
+<body>
+    <h3>Pivot</h3>
+	<p>
+	<button id="btn_excel">Export as excel</button>
+	</p>
+    <div id="output">
+    </div>
+</body>
+</html>

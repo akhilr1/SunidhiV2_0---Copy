@@ -19,7 +19,7 @@
     "popper.js": "^1.16.0",
     "register-service-worker": "^1.6.2",
     "uuid": "^8.3.2",
-    "vue": "2.6.10",
+    "vue": "2.7.16",
     "vue-audio-recorder": "^3.0.1",
     "vue-browser-geolocation": "^1.8.0",
     "vue-chartjs": "^3.5.0",
